@@ -1,0 +1,8 @@
+__pycache__
+data
+.vscode
+weights
+output
+results
+regscorer.egg-info
+build
