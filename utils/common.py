@@ -69,3 +69,20 @@ def get_log_string(result_dict, epoch=None, max_epoch=None, iteration=None, max_
         log_strings.append(timer.tostring())
     message = ', '.join(log_strings)
     return message
+
+class ExpDecayLR():
+    def __init__(self,lr_init, lr_decay_rate, decay_step):
+        self.lr_init=lr_init 
+        self.decay_step=decay_step
+        self.decay_rate=lr_decay_rate
+
+    def __call__(self, step, *args, **kwargs):
+        return self.lr_init*(self.decay_rate**(step//self.decay_step))
+    
+def reset_learning_rate(optimizer, lr):
+    for param_group in optimizer.param_groups:
+        # print(param_group)
+        # lr_before = param_group['lr']
+        param_group['lr'] = lr
+    # print('changing learning rate {:5f} to {:.5f}'.format(lr_before,lr))
+    return lr

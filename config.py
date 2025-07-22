@@ -12,6 +12,20 @@ _C = edict()
 # common
 _C.seed = 7351
 
+# dirs
+_C.working_dir = osp.dirname(osp.realpath(__file__))
+_C.root_dir = _C.working_dir
+_C.current_time = datetime.now().strftime("%Y%m%d%H%M")
+_C.exp_name = f'{osp.basename(_C.working_dir)}_{_C.current_time}'
+_C.output_dir = osp.join(_C.root_dir, 'output', _C.exp_name)
+_C.model_dir = osp.join(_C.output_dir, 'models')
+_C.log_dir = osp.join(_C.output_dir, 'logs')
+_C.pre_weight_fn = osp.join(_C.root_dir,'weights','geotransformer-3dmatch.pth.tar')
+_C.model_fn = osp.join(_C.root_dir,'weights','scorer.pth.tar')
+
+# data
+_C.data = edict()
+_C.data.dataset_root = osp.join(_C.root_dir, 'data', '3DMatch')
 
 # model - backbone
 _C.backbone = edict()
@@ -46,6 +60,28 @@ _C.geotransformer.sigma_d = 0.2
 _C.geotransformer.sigma_a = 15
 _C.geotransformer.angle_k = 3
 _C.geotransformer.reduction_a = 'max'
+
+# train
+_C.train = edict()
+_C.train.epochs = 30
+_C.train.batch_size = 1
+_C.train.num_workers = 16
+_C.train.point_limit = 30000
+_C.train.log_steps = 10#3000
+_C.train.val_steps = 10#6000
+_C.train.save_steps = 10#3000
+
+_C.optim = edict()
+_C.optim.geo_lr = 1e-4 #1e-5
+_C.optim.cls_lr = 1e-3 #1e-4
+_C.optim.lr_decay_rate = 1 #0.95
+_C.optim.lr_decay_step = 1 #the decay step of the learning rate (how many epochs)
+
+_C.loss = edict()
+_C.loss.loss_type = 'FocalLoss' # "L2loss", "CEloss"
+_C.loss.reduction = 'mean'
+_C.loss.alpha = 0.75
+_C.loss.gamma = 4.0
 
 
 def make_cfg():

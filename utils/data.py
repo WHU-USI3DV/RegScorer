@@ -194,8 +194,8 @@ def registration_collate_fn_stack_mode(
     if precompute_data:
         """ scene_name = data_dict['scene_name']
         id0,id1 = data_dict['ref_frame'],data_dict['src_frame']
-        pkl = f'/yxc/main/00_MINE/Scorer-GEO/data/3DMatch/data/overfit/{scene_name}-{id0}-{id1}.pkl'
-             with open(pkl,'rb') as f:
+        pkl = f'/Work/00_WORK/RegScorer/data/3DMatch/overfit/{scene_name}-{id0}-{id1}.pkl'
+        with open(pkl,'rb') as f:
             input_dict = pickle.load(f) """
         input_dict = precompute_data_stack_mode(points, lengths, num_stages, voxel_size, search_radius, neighbor_limits, point_num)
         collated_dict.update(input_dict)

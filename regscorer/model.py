@@ -67,7 +67,6 @@ class Scorer(nn.Module):
     def __init__(self, cfg):
         super(Scorer, self).__init__()
         self.num_classes = cfg.model.num_classes
-
         self.cls_head = nn.Sequential(
             nn.Linear(512, 256),
             nn.GroupNorm(cfg.model.group_norm,256),

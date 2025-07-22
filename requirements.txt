@@ -11,3 +11,4 @@ einops
 ipdb
 tensorboard
 tensorboardX
+torchmetrics 

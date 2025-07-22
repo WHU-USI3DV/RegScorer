@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
+from torchmetrics.classification import BinaryAUROC
+from utils.torch import to_cuda
 
 class FocalLoss(nn.Module):
     def __init__(self, cfg):
@@ -60,14 +62,30 @@ class L2Loss(nn.Module):
 class Evaluator(nn.Module):
     def __init__(self,cfg):
         super(Evaluator, self).__init__()
-        self.acceptance_bias = cfg.eval.acceptance_bias
+        if cfg.loss.loss_type == 'FocalLoss':
+            self.loss = FocalLoss(cfg).cuda()
+        elif cfg.loss.loss_type == 'CEloss':
+            self.loss = CELoss(cfg).cuda()
+        elif cfg.loss.loss_type == 'L2loss':
+            self.loss = L2Loss(cfg).cuda()
         
-    def forward(self, cls_logits, label):
-        label = label.view(-1,1)
-        prediction = torch.sigmoid(cls_logits)
-        bias = abs(label-prediction)
-        recall = 0
-        if bias <= self.acceptance_bias:
-            recall = 1
-        return recall
+    def forward(self, geo_model,score_model,val_loader):
+        geo_model.eval()
+        score_model.eval()
+        all_auc = []
+        all_loss = []
+        for data_dict in tqdm(val_loader):
+            data_dict = to_cuda(data_dict)
+            ref_feats_c_norm,src_feats_c_norm = geo_model(data_dict)
+            cls_logits = score_model(data_dict,ref_feats_c_norm,src_feats_c_norm)
+            labels = data_dict['labels']
+            loss = self.loss(cls_logits,labels)
+            all_loss.append(loss)
+            metric = BinaryAUROC().to('cuda')
+            metric.update(cls_logits,labels)
+            auroc = metric.compute()
+            all_auc.append(auroc)
+        val_loss = torch.mean(torch.tensor(all_loss))
+        val_auc = torch.mean(torch.tensor(all_auc))
+        return val_loss,val_auc
         
