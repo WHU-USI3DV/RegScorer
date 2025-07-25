@@ -63,25 +63,26 @@ _C.geotransformer.reduction_a = 'max'
 
 # train
 _C.train = edict()
-_C.train.epochs = 30
+_C.train.epochs = 10
 _C.train.batch_size = 1
 _C.train.num_workers = 16
 _C.train.point_limit = 30000
-_C.train.log_steps = 10#3000
-_C.train.val_steps = 10#6000
-_C.train.save_steps = 10#3000
+_C.train.log_steps = 5000
+_C.train.val_steps = 10000
+_C.train.save_steps = 10000
 
 _C.optim = edict()
-_C.optim.geo_lr = 1e-4 #1e-5
-_C.optim.cls_lr = 1e-3 #1e-4
-_C.optim.lr_decay_rate = 1 #0.95
+_C.optim.geo_lr = 1e-5
+_C.optim.cls_lr = 1e-4
+_C.optim.lr_decay_rate = 0.95
 _C.optim.lr_decay_step = 1 #the decay step of the learning rate (how many epochs)
 
 _C.loss = edict()
 _C.loss.loss_type = 'FocalLoss' # "L2loss", "CEloss"
 _C.loss.reduction = 'mean'
-_C.loss.alpha = 0.75
-_C.loss.gamma = 4.0
+_C.loss.alpha = 0.98
+_C.loss.gamma = 2.0
+_C.loss.scale = 10.0
 
 
 def make_cfg():

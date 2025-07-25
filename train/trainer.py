@@ -15,7 +15,7 @@ from dataops.dataset import ThreeDMatchPairDataset
 from utils.logger import Logger
 from utils.common import ExpDecayLR,reset_learning_rate
 from utils.torch import reset_seed_worker_init_fn,to_cuda
-from utils.data import calibrate_neighbors_stack_mode,registration_collate_fn_stack_mode,build_dataloader_stack_mode
+from utils.data import calibrate_neighbors_stack_mode,registration_collate_fn_stack_mode
 
 
 class Trainer():
@@ -37,13 +37,11 @@ class Trainer():
         start_time = time.time()
         self.train_set = ThreeDMatchPairDataset(
             dataset_root=self.cfg.data.dataset_root,
-            # subset='train_trans',
-            subset='overfit',
+            subset='train_trans',
             point_limit=self.cfg.train.point_limit)
         self.val_set = ThreeDMatchPairDataset(
             dataset_root=self.cfg.data.dataset_root,
-            # subset='val_trans',
-            subset='overfit',
+            subset='val_trans',
             point_limit=self.cfg.train.point_limit) 
 
         self.neighbor_limits = calibrate_neighbors_stack_mode(

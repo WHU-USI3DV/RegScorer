@@ -11,6 +11,7 @@ class FocalLoss(nn.Module):
         self.alpha = cfg.loss.alpha
         self.gamma = cfg.loss.gamma
         self.reduction = cfg.loss.reduction
+        self.scale = cfg.loss.scale
 
     def forward(self, score, label):
         p = torch.sigmoid(score)
@@ -22,11 +23,11 @@ class FocalLoss(nn.Module):
             alpha_t = self.alpha * label + (1-self.alpha) * (1-label)
             F_loss = alpha_t * F_loss
         if self.reduction == 'mean':
-            return F_loss.mean()
+            return self.scale * F_loss.mean()
         elif self.reduction == 'sum':
-            return F_loss.sum()
+            return self.scale * F_loss.sum()
         else:
-            return F_loss
+            return self.scale * F_loss
 
 class CELoss(nn.Module):
     def __init__(self, cfg):
@@ -74,18 +75,17 @@ class Evaluator(nn.Module):
         score_model.eval()
         all_auc = []
         all_loss = []
-        for data_dict in tqdm(val_loader):
-            data_dict = to_cuda(data_dict)
-            ref_feats_c_norm,src_feats_c_norm = geo_model(data_dict)
-            cls_logits = score_model(data_dict,ref_feats_c_norm,src_feats_c_norm)
-            labels = data_dict['labels']
-            loss = self.loss(cls_logits,labels)
-            all_loss.append(loss)
+        with torch.no_grad():
             metric = BinaryAUROC().to('cuda')
-            metric.update(cls_logits,labels)
-            auroc = metric.compute()
-            all_auc.append(auroc)
-        val_loss = torch.mean(torch.tensor(all_loss))
-        val_auc = torch.mean(torch.tensor(all_auc))
-        return val_loss,val_auc
+            for data_dict in tqdm(val_loader):
+                data_dict = to_cuda(data_dict)
+                ref_feats_c_norm,src_feats_c_norm = geo_model(data_dict)
+                cls_logits = score_model(data_dict,ref_feats_c_norm,src_feats_c_norm)
+                labels = data_dict['labels']
+                loss = self.loss(cls_logits,labels)
+                all_loss.append(loss.item())
+                metric.update(cls_logits,labels)
+            val_loss = torch.mean(torch.tensor(all_loss))
+            val_auc = metric.compute().item()
+            return val_loss,val_auc
         
